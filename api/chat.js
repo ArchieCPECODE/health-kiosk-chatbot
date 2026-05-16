@@ -20,7 +20,6 @@ Instructions:
 - Use bullet points for lists.
 - Never diagnose a user, always advise them to consult a doctor for serious concerns.`;
 
-    // Standardized, official payload architecture for Gemini REST endpoints
     const payload = {
       contents: [
         {
@@ -30,8 +29,9 @@ Instructions:
       ]
     };
 
+    // FIXED: Updated endpoint string to gemini-1.5-flash-latest
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,6 @@ Instructions:
 
     const data = await response.json();
 
-    // If Google returns an error object, log it so it's visible in Vercel Logs
     if (data.error) {
       console.error("Google Gemini API Error:", data.error);
       return res.status(400).json({ reply: `⚠️ API Error: ${data.error.message}` });
