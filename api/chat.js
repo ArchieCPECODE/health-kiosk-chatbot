@@ -1,7 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 export default async function handler(req, res) {
-  // Allow the frontend to talk to this backend
+  // Handle CORS preflight requests
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -11,14 +9,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get the API key from Vercel's secret environment variables
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const apiKey = process.env.GEMINI_API_KEY;
     const { message } = req.body;
-    
-    // We use gemini-1.5-flash as it is the fastest model for chatbots
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // This is the prompt that tells the AI how to act for your Capstone
     const prompt = `
       You are HealthBot, an AI assistant for a Health Monitoring Kiosk.
       The kiosk measures: Blood Pressure (BP), Heart Rate, BMI, Height, Weight, Oxygen Level (SpO2), and Sugar Levels.
@@ -31,10 +24,24 @@ export default async function handler(req, res) {
       
       The user says: ${message}`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    // Direct REST API call to Gemini 1.5 Flash
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      }
+    );
+
+    const data = await response.json();
     
-    return res.status(200).json({ reply: response.text() });
+    // Safely extract the text response text
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having trouble processing that request right now. Please try again.";
+
+    return res.status(200).json({ reply: replyText });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Failed to fetch response from AI" });
