@@ -92,7 +92,7 @@ How can I assist you today?`;
     setIsLoading(true);
 
     try {
-      // CONNECTED TO BACKEND: Routes seamlessly to your internal secure serverless function
+      // Routes seamlessly to your internal secure serverless backend function
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +101,7 @@ How can I assist you today?`;
 
       const result = await response.json();
       
-      // Grabs the reply string parsed from the backend core logic
+      // Grabs the response message parsed from the backend core logic
       const botResponseText = result.reply || result.error || "System encountered an unhandled communication fault.";
 
       setMessages(prev => [...prev, { id: Date.now() + 1, text: botResponseText, isBot: true }]);
@@ -228,10 +228,10 @@ How can I assist you today?`;
           </div>
           
           <div>
-            <h4 className="text-white font-semibold mb-4 tracking-wide uppercase text-xs">System Architecture</h4>
-            <p className="text-sm mb-1.5"><span className="text-slate-200 font-medium">Patient UI:</span> React.js & Tailwind CSS</p>
-            <p className="text-sm mb-1.5"><span className="text-slate-200 font-medium">Secure Core API:</span> Node.js / Serverless Edge</p>
-            <p className="text-sm"><span className="text-slate-200 font-medium">Diagnostic AI:</span> Gemini 2.5 Intelligence Layer</p>
+            <h4 className="text-white font-semibold mb-4 tracking-wide uppercase text-xs">Patient Protocols</h4>
+            <p className="text-sm mb-1.5"><span className="text-slate-200 font-medium">Measurement Window:</span> Rest 5 minutes prior to screening.</p>
+            <p className="text-sm mb-1.5"><span className="text-slate-200 font-medium">Diagnostic Intent:</span> Preventative metrics & baseline check.</p>
+            <p className="text-sm"><span className="text-slate-200 font-medium">Clinical Guideline:</span> Results are reference data, not a doctor diagnosis.</p>
           </div>
         </div>
 
