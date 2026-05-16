@@ -17,7 +17,7 @@ import {
   Bot
 } from 'lucide-react';
 
-// Custom lightweight line-by-line formatter for basic Markdown features
+// Custom lightweight line-by-line formatter for Markdown rendering inside chat bubbles
 const MessageFormatter = ({ text, isBot }) => {
   if (!text) return null;
   const lines = text.split('\n');
@@ -92,7 +92,7 @@ How can I assist you today?`;
     setIsLoading(true);
 
     try {
-      // CONNECTED TO BACKEND: Hits your internal production Vercel route
+      // CONNECTED TO BACKEND: Routes seamlessly to your internal secure serverless function
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +101,7 @@ How can I assist you today?`;
 
       const result = await response.json();
       
-      // Handles standard replies or errors safely wrapped from server
+      // Grabs the reply string parsed from the backend core logic
       const botResponseText = result.reply || result.error || "System encountered an unhandled communication fault.";
 
       setMessages(prev => [...prev, { id: Date.now() + 1, text: botResponseText, isBot: true }]);
@@ -142,7 +142,6 @@ How can I assist you today?`;
               <a href="#" className="hover:text-blue-600 transition-colors">Home</a>
               <a href="#features" className="hover:text-blue-600 transition-colors">System Features</a>
               <a href="#about" className="hover:text-blue-600 transition-colors">About Project</a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Contact</a>
             </div>
             <button 
               onClick={() => setIsChatOpen(true)}
@@ -182,6 +181,7 @@ How can I assist you today?`;
         </div>
       </header>
 
+      {/* Grid Features Section */}
       <main id="features" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -205,31 +205,44 @@ How can I assist you today?`;
         </div>
       </main>
 
-      <footer id="about" className="bg-slate-900 text-slate-400 py-12">
+      {/* Footer Section */}
+      <footer id="about" className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Stethoscope className="w-6 h-6 text-blue-400" />
               <span className="font-bold text-xl tracking-tight text-white">VitalsKiosk.AI</span>
             </div>
-            <p className="text-sm">A capstone project dedicated to making basic health diagnostics accessible, accurate, and intelligent.</p>
+            <p className="text-sm leading-relaxed">
+              A healthcare capstone solution engineered to make basic clinical diagnostic metrics accessible, rapid, and intelligent for primary care support.
+            </p>
           </div>
+          
           <div>
-            <h4 className="text-white font-semibold mb-4">Project Links</h4>
+            <h4 className="text-white font-semibold mb-4 tracking-wide uppercase text-xs">Clinical Framework Links</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Hardware Architecture</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Node.js API Specs</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Medical Metric Documentation</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Biomedical Sensor Architecture</a></li>
+              <li><a href="#" className="hover:text-blue-400 transition-colors">Vitals Data Exchange Specs</a></li>
             </ul>
           </div>
+          
           <div>
-            <h4 className="text-white font-semibold mb-4">System Software</h4>
-            <p className="text-sm mb-2">Frontend: React.js & Tailwind</p>
-            <p className="text-sm mb-2">Backend API: Node.js / Express</p>
-            <p className="text-sm">AI Integration: Gemini API</p>
+            <h4 className="text-white font-semibold mb-4 tracking-wide uppercase text-xs">System Architecture</h4>
+            <p className="text-sm mb-1.5"><span className="text-slate-200 font-medium">Patient UI:</span> React.js & Tailwind CSS</p>
+            <p className="text-sm mb-1.5"><span className="text-slate-200 font-medium">Secure Core API:</span> Node.js / Serverless Edge</p>
+            <p className="text-sm"><span className="text-slate-200 font-medium">Diagnostic AI:</span> Gemini 2.5 Intelligence Layer</p>
           </div>
         </div>
-      </footer >
+
+        {/* System Creators Panel Subfooter */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+          <p>© 2026 VitalsKiosk.AI. All rights reserved. Medical Diagnostic Kiosk Interface.</p>
+          <p className="bg-slate-800/50 border border-slate-700/50 text-slate-300 px-3 py-1.5 rounded-md">
+            System Engineers: <span className="text-blue-400 font-semibold">Archie Abona</span> & <span className="text-blue-400 font-semibold">Jarold Camino</span>
+          </p>
+        </div>
+      </footer>
 
       {/* Floating Chat Button */}
       {!isChatOpen && (
@@ -240,7 +253,7 @@ How can I assist you today?`;
         </button>
       )}
 
-      {/* Chatbot Window */}
+      {/* Chatbot Window Drawer */}
       {isChatOpen && (
         <div className="fixed bottom-6 right-6 w-[360px] sm:w-[420px] h-[550px] bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-5 duration-300">
           {/* Chat Header */}
