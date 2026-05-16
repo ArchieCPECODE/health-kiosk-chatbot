@@ -1,2 +1,5 @@
-@import "tailwindcss";
-@import "@tailwindcss/typography";
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Removed unknown @theme at-rule which caused the warning. */
