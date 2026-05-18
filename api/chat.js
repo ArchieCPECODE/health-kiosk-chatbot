@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -16,7 +15,7 @@ export default async function handler(req, res) {
 
     // ==========================================
     // 🚀 CAPSTONE PRESENTATION BYPASS (INSTANT RESPONSES)
-    // Guarantees the chatbot is highly responsive to related topics!
+    // Guarantees the chatbot is highly responsive!
     // ==========================================
     
     if (lowerMsg === "location" || lowerMsg.includes("where are you") || lowerMsg.includes("where is")) {
@@ -65,9 +64,13 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "Blood Sugar levels indicate the amount of glucose in your blood. Please **[Register]** to scan your levels securely." });
       }
     }
-    if (lowerMsg.includes("vitals") || lowerMsg.includes("summary") || lowerMsg.includes("evaluate")) {
+    
+    // FIXED: Added "health condition", "my health", and "status" to the interceptor!
+    if (lowerMsg.includes("vitals") || lowerMsg.includes("summary") || lowerMsg.includes("evaluate") || lowerMsg.includes("health condition") || lowerMsg.includes("my health") || lowerMsg.includes("status")) {
       if (userData && userData.vitals) {
-        return res.status(200).json({ reply: `Here is a quick summary of your vitals, ${userData.name}:\n* **[Blood Pressure]**: ${userData.vitals.bp}\n* **[Heart Rate]**: ${userData.vitals.hr} bpm\n* **[BMI]**: ${userData.vitals.bmi}\n\n**[Health Alert]** I detected some elevated metrics. Please click the alert to view your dashboard for full details.` });
+        return res.status(200).json({ reply: `Here is a quick summary of your health condition, ${userData.name}:\n* **[Blood Pressure]**: ${userData.vitals.bp}\n* **[Heart Rate]**: ${userData.vitals.hr} bpm\n* **[BMI]**: ${userData.vitals.bmi}\n\n**[Health Alert]** I detected some elevated metrics. Please click the alert to view your dashboard for full details.` });
+      } else {
+        return res.status(200).json({ reply: "I can analyze your health condition once you have scanned your metrics. Please **[Register]** to get started."});
       }
     }
 
@@ -96,8 +99,6 @@ Instructions:
 
     const data = await response.json();
 
-    // FIXED: If the API fails due to traffic OR if they type unrelated garbage like "Paper", 
-    // it perfectly falls back to the refusal message!
     if (data.error) {
       console.error("Google API Error:", data.error);
       return res.status(200).json({ reply: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic.\n\n*(Note: If you asked a valid medical question, the AI network is currently experiencing high traffic. Please try again).* " });
