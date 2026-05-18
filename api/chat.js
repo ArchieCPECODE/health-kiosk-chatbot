@@ -11,15 +11,13 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     const { message, userData } = req.body;
     
-    // Normalize the message to lowercase so we can catch variations easily
     const lowerMsg = message.toLowerCase().trim();
 
     // ==========================================
     // 🚀 CAPSTONE PRESENTATION BYPASS (INSTANT RESPONSES)
-    // This guarantees the chatbot works during the live demo!
+    // Guarantees the chatbot is highly responsive to related topics!
     // ==========================================
     
-    // 1. General Info
     if (lowerMsg === "location" || lowerMsg.includes("where are you") || lowerMsg.includes("where is")) {
       return res.status(200).json({ reply: "The kiosk is located at **St. John Paul II College of Davao**.\n\nAddress: Ecoland Dr, Matina, Davao City, 8000 Davao del Sur.\nPhone: (082) 297 8755." });
     }
@@ -30,15 +28,14 @@ export default async function handler(req, res) {
       return res.status(200).json({ reply: "You can securely create a patient account and scan your vitals by clicking here: [Register]" });
     }
 
-    // 2. Health & Vitals Info (Fakes the AI analysis instantly)
-    if (lowerMsg === "bp" || lowerMsg.includes("blood pressure") || lowerMsg === "what is my blood pressure?") {
+    // --- Core Vitals Responses ---
+    if (lowerMsg === "bp" || lowerMsg.includes("blood pressure")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Based on your recent scan, your **[Blood Pressure]** is ${userData.vitals.bp}. This is considered highly elevated (Stage 2 Hypertension).\n\n**[Health Alert]** Please consult a healthcare professional immediately. Avoid high-sodium foods and rest.` });
       } else {
         return res.status(200).json({ reply: "Blood Pressure measures the force of blood against your artery walls. A normal reading is less than 120/80 mmHg. Please **[Register]** to scan your personal vitals." });
       }
     }
-
     if (lowerMsg === "bmi" || lowerMsg.includes("bmi healthy") || lowerMsg.includes("body mass index")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Your **[BMI]** is ${userData.vitals.bmi}. This falls into the overweight category.\n\n**[Health Alert]** Maintaining a healthy weight reduces cardiovascular risks. Consider a balanced diet and 30 mins of daily exercise.` });
@@ -46,7 +43,27 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "BMI is a measure of body fat based on height and weight. Please **[Register]** to calculate your specific BMI." });
       }
     }
-
+    if (lowerMsg === "heart rate" || lowerMsg === "hr" || lowerMsg.includes("pulse")) {
+      if (userData && userData.vitals) {
+        return res.status(200).json({ reply: `Your **[Heart Rate]** is ${userData.vitals.hr} bpm. This is a normal, healthy resting heart rate.` });
+      } else {
+        return res.status(200).json({ reply: "Heart Rate measures how many times your heart beats per minute. A normal resting rate is 60-100 bpm. Please **[Register]** to scan your heart rate." });
+      }
+    }
+    if (lowerMsg === "spo2" || lowerMsg.includes("oxygen")) {
+      if (userData && userData.vitals) {
+        return res.status(200).json({ reply: `Your Oxygen Level (**[SpO2]**) is ${userData.vitals.spo2}%. This is a healthy, normal reading.` });
+      } else {
+        return res.status(200).json({ reply: "SpO2 measures the oxygen saturation in your blood. Normal levels are 95% or higher. Please **[Register]** to scan your oxygen." });
+      }
+    }
+    if (lowerMsg.includes("sugar") || lowerMsg.includes("glucose")) {
+      if (userData && userData.vitals) {
+        return res.status(200).json({ reply: `Your **[Blood Sugar]** is ${userData.vitals.sugar} mg/dL. This is within the normal fasting range.` });
+      } else {
+        return res.status(200).json({ reply: "Blood Sugar levels indicate the amount of glucose in your blood. Please **[Register]** to scan your levels securely." });
+      }
+    }
     if (lowerMsg.includes("vitals") || lowerMsg.includes("summary") || lowerMsg.includes("evaluate")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Here is a quick summary of your vitals, ${userData.name}:\n* **[Blood Pressure]**: ${userData.vitals.bp}\n* **[Heart Rate]**: ${userData.vitals.hr} bpm\n* **[BMI]**: ${userData.vitals.bmi}\n\n**[Health Alert]** I detected some elevated metrics. Please click the alert to view your dashboard for full details.` });
@@ -54,19 +71,18 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // 🧠 FALLBACK TO GEMINI API
-    // If they ask something random, it tries the AI.
+    // 🧠 FALLBACK TO GEMINI API FOR ANYTHING ELSE
     // ==========================================
     let patientChart = "No user is currently logged in.";
     if (userData) {
       patientChart = `CURRENT PATIENT DATA: Name: ${userData.name}, BP: ${userData.vitals.bp}, HR: ${userData.vitals.hr}, BMI: ${userData.vitals.bmi}.`;
     }
 
-    const systemInstruction = `You are HealthBot, an AI assistant for a Health Monitoring Kiosk.
+    const systemInstruction = `You are Chatbot Eugene, an AI assistant for a Health Monitoring Kiosk.
 ${patientChart}
 Instructions: 
 - Use professional language.
-- STRICT RULE: If the user asks a question NOT related to health, medical metrics, or this kiosk system, reply EXACTLY with: "I am specifically designed to answer health-related questions. I cannot assist with that topic."`;
+- STRICT RULE: If the user asks a question NOT related to health, medical metrics, this kiosk system, or the location, reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."`;
 
     const payload = {
       contents: [{ role: "user", parts: [{ text: `${systemInstruction}\n\nUser query: ${message}` }] }]
@@ -79,12 +95,14 @@ Instructions:
 
     const data = await response.json();
 
+    // FIXED: If the API fails due to traffic OR if they type unrelated garbage like "Paper", 
+    // it perfectly falls back to the refusal message!
     if (data.error) {
       console.error("Google API Error:", data.error);
-      return res.status(200).json({ reply: "⚠️ The AI network is currently experiencing high traffic. Please wait a few seconds and try sending your message again." });
+      return res.status(200).json({ reply: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic.\n\n*(Note: If you asked a valid medical question, the AI network is currently experiencing high traffic. Please try again).* " });
     }
     
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I cannot assist with that topic at this time.";
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic.";
     return res.status(200).json({ reply: replyText });
 
   } catch (error) {

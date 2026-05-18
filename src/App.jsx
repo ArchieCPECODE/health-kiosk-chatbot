@@ -86,7 +86,7 @@ export default function HealthSystemApp() {
   const [messages, setMessages] = useState([
     { 
       id: 1, 
-      text: `Hello! I'm **HealthBot**, the assistant for the Health Monitoring System.\n\nI can help you understand our System, including:\n* How we measure **Blood Pressure**, **Heart Rate**, and **BMI**.\n* How the **instant printing** feature works.\n* Details about our **hardware architecture**.\n\nIf you register an account, I can also analyze your personal vitals!\n\nHow can I assist you today?`, 
+      text: `Hello! I'm **Chatbot Eugene**, the assistant for the Health Monitoring System.\n\nI can help you understand our System, including:\n* How we measure **Blood Pressure**, **Heart Rate**, and **BMI**.\n* How the **instant printing** feature works.\n* Details about our **hardware architecture**.\n\nIf you register an account, I can also analyze your personal vitals!\n\nHow can I assist you today?`, 
       isBot: true 
     }
   ]);
@@ -254,9 +254,9 @@ export default function HealthSystemApp() {
       <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl flex items-start gap-4">
         <div className="bg-blue-600 text-white p-3 rounded-xl"><Bot className="w-6 h-6" /></div>
         <div>
-          <h3 className="font-bold text-blue-900 mb-1">AI Health Analysis Available</h3>
-          <p className="text-blue-800 text-sm mb-3">HealthBot has access to your latest scan. Open the chat module to ask specific questions about your readings.</p>
-          <button onClick={() => setIsChatOpen(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition-colors">Ask HealthBot Now</button>
+          <h3 className="font-bold text-blue-900 mb-1">Ask Eugene</h3>
+          <p className="text-blue-800 text-sm mb-3">Chatbot Eugene has access to your latest scan. Open the chat module to ask specific questions about your readings.</p>
+          <button onClick={() => setIsChatOpen(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition-colors">Ask Eugene Now</button>
         </div>
       </div>
     </div>
@@ -347,7 +347,6 @@ export default function HealthSystemApp() {
             </div>
           </main>
 
-          {/* NEW MAP & LOCATION SECTION - STACKED LAYOUT */}
           <section id="location" className="py-20 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
@@ -358,7 +357,6 @@ export default function HealthSystemApp() {
               </div>
               
               <div className="bg-slate-50 rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
-                {/* Google Map Embed - Full Width Top */}
                 <div className="w-full h-80 md:h-[450px]">
                   <iframe 
                     src="https://maps.google.com/maps?q=St.%20John%20Paul%20II%20College%20of%20Davao&t=&z=15&ie=UTF8&iwloc=&output=embed" 
@@ -372,10 +370,7 @@ export default function HealthSystemApp() {
                   ></iframe>
                 </div>
 
-                {/* Text Details - Full Width Bottom */}
                 <div className="p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-white">
-                  
-                  {/* Location Column */}
                   <div className="flex-1 w-full">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -389,10 +384,8 @@ export default function HealthSystemApp() {
                     </div>
                   </div>
                   
-                  {/* Divider (Desktop Only) */}
                   <div className="hidden md:block w-px h-24 bg-slate-200"></div>
                   
-                  {/* Phone Column */}
                   <div className="flex-1 w-full">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -404,7 +397,6 @@ export default function HealthSystemApp() {
                       <p className="text-slate-600 font-medium text-lg">(082) 297 8755</p>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -463,7 +455,7 @@ export default function HealthSystemApp() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30"><Bot className="w-6 h-6 text-white" /></div>
               <div>
-                <h3 className="font-bold text-sm tracking-wide">HealthBot AI</h3>
+                <h3 className="font-bold text-sm tracking-wide">Chatbot Eugene</h3>
                 <p className="text-xs text-blue-100 font-medium flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                   {currentUser ? `Analyzing: ${currentUser.name}` : 'System Online'}
@@ -500,7 +492,7 @@ export default function HealthSystemApp() {
           )}
 
           <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-100 flex gap-2">
-            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Ask about your health data..." className="flex-1 bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-full px-5 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400" />
+            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Ask Eugene a question..." className="flex-1 bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-full px-5 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400" />
             <button type="submit" disabled={!inputText.trim() || isLoading} className="w-11 h-11 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm flex-shrink-0"><Send className="w-4 h-4 ml-0.5" /></button>
           </form>
         </div>
