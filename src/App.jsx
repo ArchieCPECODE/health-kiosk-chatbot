@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Activity, Heart, Scale, Ruler, Droplet, Printer, Cpu, 
-  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock 
+  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock, AlertTriangle, Info 
 } from 'lucide-react';
 
-// --- Secure Registration Sub-Component ---
 const RegisterForm = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -16,12 +15,12 @@ const RegisterForm = ({ onComplete }) => {
       email: e.target.email.value,
       password: e.target.password.value
     });
-    setStep(2); // Move to OTP verification
+    setStep(2); 
   };
 
   const handleStep2 = (e) => {
     e.preventDefault();
-    onComplete(formData.name); // OTP successful, log user in
+    onComplete(formData.name); 
   };
 
   return (
@@ -77,7 +76,6 @@ const RegisterForm = ({ onComplete }) => {
   );
 };
 
-
 export default function HealthSystemApp() {
   const [currentPage, setCurrentPage] = useState('home'); 
   const [currentUser, setCurrentUser] = useState(null);
@@ -98,7 +96,6 @@ export default function HealthSystemApp() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading, isChatOpen]);
 
-  // Magic Link Formatter
   const MessageFormatter = ({ text, isBot }) => {
     if (!text) return null;
     const lines = text.split('\n');
@@ -115,11 +112,11 @@ export default function HealthSystemApp() {
             if (part.startsWith('**') && part.endsWith('**')) return <strong key={j} className="font-bold">{part.slice(2, -2)}</strong>;
             if (part.startsWith('[') && part.endsWith(']')) {
               const linkText = part.slice(1, -1);
+              const isAlert = linkText.toLowerCase() === 'health alert';
               return (
                 <button 
                   key={j}
                   onClick={() => {
-                    // Route to registration if AI gives [Register] link
                     if (linkText.toLowerCase() === 'register') {
                       setCurrentPage('register');
                     } else if (currentUser) {
@@ -128,8 +125,9 @@ export default function HealthSystemApp() {
                       setCurrentPage('register');
                     }
                   }}
-                  className="inline-flex items-center text-blue-600 font-bold hover:text-blue-800 underline decoration-blue-300 underline-offset-2 transition-colors cursor-pointer bg-blue-50 px-1 rounded mx-0.5"
+                  className={`inline-flex items-center font-bold underline underline-offset-2 transition-colors cursor-pointer px-1 rounded mx-0.5 ${isAlert ? 'text-rose-600 hover:text-rose-800 decoration-rose-300 bg-rose-50' : 'text-blue-600 hover:text-blue-800 decoration-blue-300 bg-blue-50'}`}
                 >
+                  {isAlert && <AlertTriangle className="w-3 h-3 mr-1" />}
                   {linkText} ↗
                 </button>
               );
@@ -184,18 +182,23 @@ export default function HealthSystemApp() {
   ];
 
   const suggestedQuestions = currentUser 
-    ? ["What is my Blood Pressure?", "Is my BMI healthy?", "Review my vitals"] 
+    ? ["Review my vitals", "What is my Blood Pressure?", "Is my BMI healthy?"] 
     : ["How to register?", "Who are the engineers?", "What is a normal BP?"];
-
 
   const handleRegistrationComplete = (userName) => {
     setCurrentUser({
       name: userName,
-      vitals: { bp: '142/92', hr: 88, bmi: 26.5, spo2: 97, sugar: 105, height: '175cm', weight: '81kg' }
+      vitals: { bp: '142/92', hr: 88, bmi: 26.5, spo2: 97, sugar: 105, height: '175cm', weight: '81kg' },
+      // Medical Conditions calculated from hardware vitals
+      conditions: [
+        { title: "Stage 2 Hypertension", type: "warning", desc: "Your blood pressure is highly elevated (142/92). Please consult a healthcare professional immediately.", advice: "Avoid high-sodium foods and rest." },
+        { title: "Overweight", type: "info", desc: "Your BMI is 26.5. Maintaining a healthy weight reduces cardiovascular risks.", advice: "Consider a balanced diet and 30 mins of daily exercise." }
+      ]
     });
     setCurrentPage('dashboard');
     setIsChatOpen(true);
-    sendMessageToBot(`Hi, I just securely registered and verified my OTP as ${userName}. Give me a quick summary of my overall vitals and health.`);
+    // Trigger the AI to analyze the data and generate the [Health Alert] automatically!
+    sendMessageToBot(`Hi, I just securely registered and verified my OTP as ${userName}. Please evaluate my vitals, issue a [Health Alert] if there are any issues, and give me advice.`);
   };
 
   const renderDashboard = () => (
@@ -210,6 +213,31 @@ export default function HealthSystemApp() {
         </button>
       </div>
 
+      {/* NEW: Active Health Alerts Section */}
+      {currentUser?.conditions && currentUser.conditions.length > 0 && (
+        <div className="mb-8 animate-in slide-in-from-bottom-2">
+          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-rose-500" /> Detected Health Conditions
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentUser.conditions.map((cond, idx) => (
+              <div key={idx} className={`p-5 rounded-2xl border flex gap-4 items-start ${cond.type === 'warning' ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100'}`}>
+                <div className={`p-2 rounded-full mt-0.5 ${cond.type === 'warning' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'}`}>
+                  {cond.type === 'warning' ? <Activity className="w-5 h-5" /> : <Info className="w-5 h-5" />}
+                </div>
+                <div>
+                  <h4 className={`font-bold mb-1 ${cond.type === 'warning' ? 'text-rose-900' : 'text-amber-900'}`}>{cond.title}</h4>
+                  <p className={`text-sm mb-2 ${cond.type === 'warning' ? 'text-rose-800' : 'text-amber-800'}`}>{cond.desc}</p>
+                  <p className={`text-xs font-semibold px-2 py-1 rounded-md inline-block ${cond.type === 'warning' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>Advice: {cond.advice}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Standard Vitals Grid */}
+      <h3 className="text-xl font-bold text-slate-900 mb-4">Raw Vital Signs</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Blood Pressure', val: currentUser?.vitals.bp, icon: <Heart className="w-5 h-5 text-rose-500" />, status: 'Elevated' },
