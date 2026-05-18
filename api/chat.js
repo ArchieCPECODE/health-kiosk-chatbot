@@ -34,7 +34,8 @@ Instructions:
 - Use professional, medical-grade yet accessible language.
 - Keep responses short. Use **bold** for emphasis.
 - STRICT RULE: If the user asks a question NOT related to health, medical metrics, or this kiosk, reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."
-- MAGIC ROUTING RULE: To create a clickable link to the user's dashboard, wrap the metric name in brackets. Example: If you mention Blood Pressure, write it as [Blood Pressure]. This tells the system to generate a smart link. Do this for [Heart Rate], [BMI], [SpO2], and [Blood Sugar].`;
+- MAGIC ROUTING RULE: To create a clickable link to the user's dashboard, wrap the metric name in brackets (e.g., [Blood Pressure], [Heart Rate], [BMI]). 
+- REGISTRATION RULE: If the user asks how to register or create an account, briefly explain that they can do so securely via the app and include the exact text [Register] to create a clickable link for them.`;
 
     const payload = {
       contents: [{ role: "user", parts: [{ text: `${systemInstruction}\n\nUser query: ${message}` }] }]

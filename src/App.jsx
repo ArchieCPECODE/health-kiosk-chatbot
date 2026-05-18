@@ -1,15 +1,87 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Activity, Heart, Scale, Ruler, Droplet, Printer, Cpu, 
-  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut 
+  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock 
 } from 'lucide-react';
 
+// --- Secure Registration Sub-Component ---
+const RegisterForm = ({ onComplete }) => {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+
+  const handleStep1 = (e) => {
+    e.preventDefault();
+    setFormData({
+      name: e.target.name.value,
+      email: e.target.email.value,
+      password: e.target.password.value
+    });
+    setStep(2); // Move to OTP verification
+  };
+
+  const handleStep2 = (e) => {
+    e.preventDefault();
+    onComplete(formData.name); // OTP successful, log user in
+  };
+
+  return (
+    <div className="pt-24 pb-20 px-4 max-w-md mx-auto min-h-[70vh]">
+      <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${step === 1 ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
+          {step === 1 ? <User className="w-6 h-6" /> : <ShieldCheck className="w-6 h-6" />}
+        </div>
+        <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">
+          {step === 1 ? 'Patient Registration' : 'Security Verification'}
+        </h2>
+        <p className="text-center text-slate-500 text-sm mb-8">
+          {step === 1 ? 'Create a secure account to track your hardware vitals.' : `Enter the 6-digit OTP sent to ${formData.email}`}
+        </p>
+        
+        {step === 1 ? (
+          <form onSubmit={handleStep1} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+              <input name="name" required type="text" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Juan Dela Cruz" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input name="email" required type="email" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="juan@example.com" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input name="password" required type="password" className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="••••••••" />
+              </div>
+            </div>
+            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md mt-2">
+              Continue securely
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleStep2} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1 text-center">One-Time Password (OTP)</label>
+              <input name="otp" required type="text" maxLength="6" className="w-full px-4 py-3 text-center tracking-widest text-2xl font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="123456" />
+            </div>
+            <button type="submit" className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-md mt-2">
+              Verify & Scan Vitals
+            </button>
+            <button type="button" onClick={() => setStep(1)} className="w-full text-slate-500 text-sm hover:text-slate-700 mt-2 font-medium">
+              Go Back
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
 export default function HealthSystemApp() {
-  // Application State
   const [currentPage, setCurrentPage] = useState('home'); 
   const [currentUser, setCurrentUser] = useState(null);
   
-  // Chatbot State
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -47,8 +119,14 @@ export default function HealthSystemApp() {
                 <button 
                   key={j}
                   onClick={() => {
-                    if (currentUser) setCurrentPage('dashboard');
-                    else setCurrentPage('register');
+                    // Route to registration if AI gives [Register] link
+                    if (linkText.toLowerCase() === 'register') {
+                      setCurrentPage('register');
+                    } else if (currentUser) {
+                      setCurrentPage('dashboard');
+                    } else {
+                      setCurrentPage('register');
+                    }
                   }}
                   className="inline-flex items-center text-blue-600 font-bold hover:text-blue-800 underline decoration-blue-300 underline-offset-2 transition-colors cursor-pointer bg-blue-50 px-1 rounded mx-0.5"
                 >
@@ -109,38 +187,16 @@ export default function HealthSystemApp() {
     ? ["What is my Blood Pressure?", "Is my BMI healthy?", "Review my vitals"] 
     : ["How to register?", "Who are the engineers?", "What is a normal BP?"];
 
-  // --- SUB-PAGES ---
-  const renderRegister = () => (
-    <div className="pt-24 pb-20 px-4 max-w-md mx-auto min-h-[70vh]">
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100">
-        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <User className="w-6 h-6" />
-        </div>
-        <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">Patient Registration</h2>
-        <p className="text-center text-slate-500 text-sm mb-8">Register to instantly track your hardware vitals.</p>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          const name = e.target.name.value;
-          // Generating Mock Vitals upon registration
-          setCurrentUser({
-            name: name,
-            vitals: { bp: '142/92', hr: 88, bmi: 26.5, spo2: 97, sugar: 105, height: '175cm', weight: '81kg' }
-          });
-          setCurrentPage('dashboard');
-          setIsChatOpen(true);
-          sendMessageToBot(`Hi, I just registered as ${name}. Give me a quick summary of my overall vitals and health.`);
-        }} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-            <input name="name" required type="text" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Juan Dela Cruz" />
-          </div>
-          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md">
-            Register & Scan Vitals
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+
+  const handleRegistrationComplete = (userName) => {
+    setCurrentUser({
+      name: userName,
+      vitals: { bp: '142/92', hr: 88, bmi: 26.5, spo2: 97, sugar: 105, height: '175cm', weight: '81kg' }
+    });
+    setCurrentPage('dashboard');
+    setIsChatOpen(true);
+    sendMessageToBot(`Hi, I just securely registered and verified my OTP as ${userName}. Give me a quick summary of my overall vitals and health.`);
+  };
 
   const renderDashboard = () => (
     <div className="pt-16 pb-20 px-4 max-w-5xl mx-auto min-h-[70vh]">
@@ -301,7 +357,7 @@ export default function HealthSystemApp() {
         </>
       )}
 
-      {currentPage === 'register' && renderRegister()}
+      {currentPage === 'register' && <RegisterForm onComplete={handleRegistrationComplete} />}
       {currentPage === 'dashboard' && currentUser && renderDashboard()}
 
       {/* FLOATING CHAT BUTTON */}
@@ -357,7 +413,7 @@ export default function HealthSystemApp() {
           )}
 
           <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-100 flex gap-2">
-            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Ask about the project..." className="flex-1 bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-full px-5 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400" />
+            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Ask about your health data..." className="flex-1 bg-slate-100/80 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-full px-5 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400" />
             <button type="submit" disabled={!inputText.trim() || isLoading} className="w-11 h-11 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm flex-shrink-0"><Send className="w-4 h-4 ml-0.5" /></button>
           </form>
         </div>
