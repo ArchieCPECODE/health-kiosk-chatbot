@@ -17,7 +17,6 @@ import {
   Bot
 } from 'lucide-react';
 
-// Custom lightweight line-by-line formatter for Markdown rendering inside chat bubbles
 const MessageFormatter = ({ text, isBot }) => {
   if (!text) return null;
   const lines = text.split('\n');
@@ -27,11 +26,9 @@ const MessageFormatter = ({ text, isBot }) => {
       {lines.map((line, i) => {
         if (!line.trim()) return <div key={i} className="h-1"></div>;
 
-        // Detect list items (bullet points)
         const isList = /^[-*]\s/.test(line.trim());
         let content = isList ? line.trim().replace(/^[-*]\s/, '') : line;
 
-        // Parse bold text snippets
         const parts = content.split(/(\*\*.*?\*\*)/g);
         const formattedParts = parts.map((part, j) => {
           if (part.startsWith('**') && part.endsWith('**')) {
@@ -58,9 +55,10 @@ const MessageFormatter = ({ text, isBot }) => {
 export default function HealthSystemApp() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   
+  // FIXED: Changed "capstone project" to "System"
   const initialMessage = `Hello! I'm **HealthBot**, the assistant for the Health Monitoring System.
 
-I can help you understand our capstone project, including:
+I can help you understand our System, including:
 * How we measure **Blood Pressure**, **Heart Rate**, and **BMI**.
 * How the **instant printing** feature works.
 * Details about our **hardware architecture**.
@@ -82,26 +80,23 @@ How can I assist you today?`;
     scrollToBottom();
   }, [messages, isLoading]);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
+  // Refactored to allow sending text from both the input box and the suggestion buttons
+  const sendMessageToBot = async (textToSend) => {
+    if (!textToSend.trim()) return;
 
-    const userMsg = { id: Date.now(), text: inputText, isBot: false };
+    const userMsg = { id: Date.now(), text: textToSend, isBot: false };
     setMessages(prev => [...prev, userMsg]);
     setInputText("");
     setIsLoading(true);
 
     try {
-      // Routes seamlessly to your internal secure serverless backend function
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.text })
+        body: JSON.stringify({ message: textToSend })
       });
 
       const result = await response.json();
-      
-      // Grabs the response message parsed from the backend core logic
       const botResponseText = result.reply || result.error || "System encountered an unhandled communication fault.";
 
       setMessages(prev => [...prev, { id: Date.now() + 1, text: botResponseText, isBot: true }]);
@@ -117,6 +112,18 @@ How can I assist you today?`;
     }
   };
 
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    sendMessageToBot(inputText);
+  };
+
+  // The Suggested Questions Array
+  const suggestedQuestions = [
+    "What is a normal BP?",
+    "Who are the system engineers?",
+    "How does BMI work?"
+  ];
+
   const features = [
     { icon: <Heart className="w-8 h-8 text-rose-500" />, title: "Blood Pressure & Heart Rate", desc: "Clinical-grade cuffs and sensors for real-time cardiovascular monitoring." },
     { icon: <Scale className="w-8 h-8 text-blue-500" />, title: "BMI & Weight", desc: "Precision load cells paired with instant Body Mass Index calculations." },
@@ -130,7 +137,6 @@ How can I assist you today?`;
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
-      {/* Navbar */}
       <nav className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -153,7 +159,6 @@ How can I assist you today?`;
         </div>
       </nav>
 
-      {/* Hero Section */}
       <header className="relative overflow-hidden bg-white">
         <div className="absolute inset-y-0 right-0 w-1/2 bg-blue-50 rounded-l-full opacity-50 transform translate-x-1/3"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 relative z-10">
@@ -181,7 +186,6 @@ How can I assist you today?`;
         </div>
       </header>
 
-      {/* Grid Features Section */}
       <main id="features" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -205,7 +209,6 @@ How can I assist you today?`;
         </div>
       </main>
 
-      {/* Footer Section */}
       <footer id="about" className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
@@ -235,7 +238,6 @@ How can I assist you today?`;
           </div>
         </div>
 
-        {/* System Creators Panel Subfooter */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
           <p>© 2026 VitalsKiosk.AI. All rights reserved. Medical Diagnostic Kiosk Interface.</p>
           <p className="bg-slate-800/50 border border-slate-700/50 text-slate-300 px-3 py-1.5 rounded-md text-center sm:text-left">
@@ -244,7 +246,6 @@ How can I assist you today?`;
         </div>
       </footer>
 
-      {/* Floating Chat Button */}
       {!isChatOpen && (
         <button 
           onClick={() => setIsChatOpen(true)}
@@ -253,10 +254,8 @@ How can I assist you today?`;
         </button>
       )}
 
-      {/* Chatbot Window Drawer */}
       {isChatOpen && (
         <div className="fixed bottom-6 right-6 w-[360px] sm:w-[420px] h-[550px] bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-5 duration-300">
-          {/* Chat Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 flex justify-between items-center text-white shadow-md z-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
@@ -275,19 +274,14 @@ How can I assist you today?`;
             </button>
           </div>
 
-          {/* Chat Messages Area */}
           <div className="flex-1 p-5 overflow-y-auto bg-slate-50 space-y-5 scroll-smooth">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'} items-end gap-2`}>
-                
-                {/* Bot Avatar */}
                 {msg.isBot && (
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center border border-blue-200 mb-1 shadow-sm">
                     <Bot className="w-4 h-4 text-blue-600" />
                   </div>
                 )}
-
-                {/* Message Bubble */}
                 <div className={`max-w-[78%] p-3.5 text-sm ${
                   msg.isBot 
                     ? 'bg-white text-slate-700 border border-slate-200 rounded-2xl rounded-bl-sm shadow-sm' 
@@ -298,7 +292,6 @@ How can I assist you today?`;
               </div>
             ))}
             
-            {/* Loading Indicator */}
             {isLoading && (
               <div className="flex justify-start items-end gap-2">
                  <div className="w-8 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center border border-blue-200 mb-1 shadow-sm">
@@ -314,7 +307,21 @@ How can I assist you today?`;
             <div ref={messagesEndRef} className="h-1" />
           </div>
 
-          {/* Chat Input Area */}
+          {/* Suggested Questions Chips */}
+          {messages.length === 1 && !isLoading && (
+            <div className="px-3 pb-2 flex flex-wrap gap-2 bg-white pt-2 border-t border-slate-100">
+              {suggestedQuestions.map((q, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => sendMessageToBot(q)}
+                  className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-600 hover:text-white transition-colors text-left"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
+
           <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-100 flex gap-2">
             <input 
               type="text" 
