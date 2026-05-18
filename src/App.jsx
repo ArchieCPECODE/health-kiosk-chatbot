@@ -183,7 +183,7 @@ export default function HealthSystemApp() {
 
   const suggestedQuestions = currentUser 
     ? ["Review my vitals", "What is my Blood Pressure?", "Is my BMI healthy?"] 
-    : ["How to register?", "Who are the engineers?", "What is a normal BP?"];
+    : ["How to register?", "Where are you located?", "Who are the engineers?"];
 
   const handleRegistrationComplete = (userName) => {
     setCurrentUser({
@@ -347,7 +347,7 @@ export default function HealthSystemApp() {
             </div>
           </main>
 
-          {/* NEW MAP & LOCATION SECTION */}
+          {/* NEW MAP & LOCATION SECTION - STACKED LAYOUT */}
           <section id="location" className="py-20 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
@@ -357,38 +357,11 @@ export default function HealthSystemApp() {
                 </p>
               </div>
               
-              <div className="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row">
-                {/* Text Details */}
-                <div className="p-8 md:w-1/3 flex flex-col justify-center">
-                  <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-lg text-slate-900">Location</h3>
-                    </div>
-                    <div className="pl-13">
-                      <p className="text-slate-800 font-bold mb-1">St. John Paul II College of Davao</p>
-                      <p className="text-slate-600 leading-relaxed">Ecoland Dr, Matina, Davao City,<br/>8000 Davao del Sur</p>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-5 h-5" />
-                      </div>
-                      <h3 className="font-bold text-lg text-slate-900">Contact</h3>
-                    </div>
-                    <div className="pl-13">
-                      <p className="text-slate-600">(082) 297 8755</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Google Map Embed */}
-                <div className="md:w-2/3 h-72 md:h-auto min-h-[350px]">
+              <div className="bg-slate-50 rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
+                {/* Google Map Embed - Full Width Top */}
+                <div className="w-full h-80 md:h-[450px]">
                   <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.578619069352!2d125.59477027584109!3d7.058694092942403!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32f90d79679f048d%3A0x600bfa5eb3ce65ab!2sSt.%20John%20Paul%20II%20College%20of%20Davao!5e0!3m2!1sen!2sph!4v1716022880000!5m2!1sen!2sph" 
+                    src="https://maps.google.com/maps?q=St.%20John%20Paul%20II%20College%20of%20Davao&t=&z=15&ie=UTF8&iwloc=&output=embed" 
                     width="100%" 
                     height="100%" 
                     style={{ border: 0 }} 
@@ -397,6 +370,41 @@ export default function HealthSystemApp() {
                     referrerPolicy="no-referrer-when-downgrade"
                     title="St. John Paul II College of Davao Location"
                   ></iframe>
+                </div>
+
+                {/* Text Details - Full Width Bottom */}
+                <div className="p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-white">
+                  
+                  {/* Location Column */}
+                  <div className="flex-1 w-full">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-lg text-slate-900">Location</h3>
+                    </div>
+                    <div className="pl-13 md:pl-14">
+                      <p className="text-slate-800 font-bold mb-1">St. John Paul II College of Davao</p>
+                      <p className="text-slate-600 leading-relaxed">Ecoland Dr, Matina, Davao City,<br/>8000 Davao del Sur</p>
+                    </div>
+                  </div>
+                  
+                  {/* Divider (Desktop Only) */}
+                  <div className="hidden md:block w-px h-24 bg-slate-200"></div>
+                  
+                  {/* Phone Column */}
+                  <div className="flex-1 w-full">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-lg text-slate-900">Contact</h3>
+                    </div>
+                    <div className="pl-13 md:pl-14">
+                      <p className="text-slate-600 font-medium text-lg">(082) 297 8755</p>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
