@@ -9,10 +9,8 @@ export default async function handler(req, res) {
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    // We now accept userData from the frontend!
     const { message, userData } = req.body;
 
-    // Create a dynamic patient chart based on whether someone is logged in
     let patientChart = "No user is currently logged in. Provide general information.";
     if (userData) {
       patientChart = `
@@ -28,14 +26,14 @@ export default async function handler(req, res) {
     }
 
     const systemInstruction = `You are HealthBot, an AI assistant for a Health Monitoring Kiosk.
-The system engineers are Archie Abona, Jarold Camino, and Kiervy Lawas.
+The system engineers and creators of this project are Archie Abona, Jarold Camino, and Kiervy Lawas.
 
 ${patientChart}
 
 Instructions: 
 - Use professional, medical-grade yet accessible language.
 - Keep responses short. Use **bold** for emphasis.
-- STRICT RULE: If the user asks a question NOT related to health or this kiosk, reply EXACTLY with: "I am specifically designed to answer health-related questions. I cannot assist with that topic."
+- STRICT RULE: If the user asks a question NOT related to health, medical metrics, or this kiosk, reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."
 - MAGIC ROUTING RULE: To create a clickable link to the user's dashboard, wrap the metric name in brackets. Example: If you mention Blood Pressure, write it as [Blood Pressure]. This tells the system to generate a smart link. Do this for [Heart Rate], [BMI], [SpO2], and [Blood Sugar].`;
 
     const payload = {
