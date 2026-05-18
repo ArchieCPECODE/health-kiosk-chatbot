@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Activity, Heart, Scale, Ruler, Droplet, Printer, Cpu, 
-  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock, AlertTriangle, Info 
+  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock, AlertTriangle, Info, MapPin, Phone 
 } from 'lucide-react';
 
 const RegisterForm = ({ onComplete }) => {
@@ -189,7 +189,6 @@ export default function HealthSystemApp() {
     setCurrentUser({
       name: userName,
       vitals: { bp: '142/92', hr: 88, bmi: 26.5, spo2: 97, sugar: 105, height: '175cm', weight: '81kg' },
-      // Medical Conditions calculated from hardware vitals
       conditions: [
         { title: "Stage 2 Hypertension", type: "warning", desc: "Your blood pressure is highly elevated (142/92). Please consult a healthcare professional immediately.", advice: "Avoid high-sodium foods and rest." },
         { title: "Overweight", type: "info", desc: "Your BMI is 26.5. Maintaining a healthy weight reduces cardiovascular risks.", advice: "Consider a balanced diet and 30 mins of daily exercise." }
@@ -197,7 +196,6 @@ export default function HealthSystemApp() {
     });
     setCurrentPage('dashboard');
     setIsChatOpen(true);
-    // Trigger the AI to analyze the data and generate the [Health Alert] automatically!
     sendMessageToBot(`Hi, I just securely registered and verified my OTP as ${userName}. Please evaluate my vitals, issue a [Health Alert] if there are any issues, and give me advice.`);
   };
 
@@ -213,7 +211,6 @@ export default function HealthSystemApp() {
         </button>
       </div>
 
-      {/* NEW: Active Health Alerts Section */}
       {currentUser?.conditions && currentUser.conditions.length > 0 && (
         <div className="mb-8 animate-in slide-in-from-bottom-2">
           <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -236,7 +233,6 @@ export default function HealthSystemApp() {
         </div>
       )}
 
-      {/* Standard Vitals Grid */}
       <h3 className="text-xl font-bold text-slate-900 mb-4">Raw Vital Signs</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
@@ -350,6 +346,61 @@ export default function HealthSystemApp() {
               </div>
             </div>
           </main>
+
+          {/* NEW MAP & LOCATION SECTION */}
+          <section id="location" className="py-20 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">Visit Our Kiosk</h2>
+                <p className="text-slate-600 max-w-2xl mx-auto">
+                  Experience the VitalsKiosk.AI hardware prototype in person at our campus.
+                </p>
+              </div>
+              
+              <div className="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row">
+                {/* Text Details */}
+                <div className="p-8 md:w-1/3 flex flex-col justify-center">
+                  <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-lg text-slate-900">Location</h3>
+                    </div>
+                    <div className="pl-13">
+                      <p className="text-slate-800 font-bold mb-1">St. John Paul II College of Davao</p>
+                      <p className="text-slate-600 leading-relaxed">Ecoland Dr, Matina, Davao City,<br/>8000 Davao del Sur</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-bold text-lg text-slate-900">Contact</h3>
+                    </div>
+                    <div className="pl-13">
+                      <p className="text-slate-600">(082) 297 8755</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Google Map Embed */}
+                <div className="md:w-2/3 h-72 md:h-auto min-h-[350px]">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.578619069352!2d125.59477027584109!3d7.058694092942403!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32f90d79679f048d%3A0x600bfa5eb3ce65ab!2sSt.%20John%20Paul%20II%20College%20of%20Davao!5e0!3m2!1sen!2sph!4v1716022880000!5m2!1sen!2sph" 
+                    width="100%" 
+                    height="100%" 
+                    style={{ border: 0 }} 
+                    allowFullScreen="" 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="St. John Paul II College of Davao Location"
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <footer id="about" className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
