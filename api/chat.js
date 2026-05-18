@@ -9,53 +9,54 @@ export default async function handler(req, res) {
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    const { message } = req.body;
+    // We now accept userData from the frontend!
+    const { message, userData } = req.body;
+
+    // Create a dynamic patient chart based on whether someone is logged in
+    let patientChart = "No user is currently logged in. Provide general information.";
+    if (userData) {
+      patientChart = `
+      CURRENT PATIENT DATA:
+      Name: ${userData.name}
+      Blood Pressure: ${userData.vitals.bp}
+      Heart Rate: ${userData.vitals.hr} bpm
+      BMI: ${userData.vitals.bmi}
+      SpO2: ${userData.vitals.spo2}%
+      Blood Sugar: ${userData.vitals.sugar} mg/dL
+      
+      If the user asks about their specific metrics, analyze this data, tell them their condition, and offer professional recommendations.`;
+    }
 
     const systemInstruction = `You are HealthBot, an AI assistant for a Health Monitoring Kiosk.
-The system engineers and creators of this project are Archie Abona, Jarold Camino, and Kiervy Lawas.
-The kiosk measures: Blood Pressure (BP), Heart Rate, BMI, Height, Weight, Oxygen Level (SpO2), and Sugar Levels.
+The system engineers are Archie Abona, Jarold Camino, and Kiervy Lawas.
+
+${patientChart}
+
 Instructions: 
 - Use professional, medical-grade yet accessible language.
-- Keep responses relatively short and easy to read on a screen.
-- Use **bold** for emphasis.
-- Use bullet points for lists.
-- Never diagnose a user, always advise them to consult a doctor for serious concerns.
-- STRICT RULE: If the user asks a question or types a random word (like "paper", "dog", etc.) that is NOT related to health, medical metrics, or this kiosk system, you must politely decline. Reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."`;
+- Keep responses short. Use **bold** for emphasis.
+- STRICT RULE: If the user asks a question NOT related to health or this kiosk, reply EXACTLY with: "I am specifically designed to answer health-related questions. I cannot assist with that topic."
+- MAGIC ROUTING RULE: To create a clickable link to the user's dashboard, wrap the metric name in brackets. Example: If you mention Blood Pressure, write it as [Blood Pressure]. This tells the system to generate a smart link. Do this for [Heart Rate], [BMI], [SpO2], and [Blood Sugar].`;
 
     const payload = {
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${systemInstruction}\n\nUser query: ${message}` }]
-        }
-      ]
+      contents: [{ role: "user", parts: [{ text: `${systemInstruction}\n\nUser query: ${message}` }] }]
     };
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
     );
 
     const data = await response.json();
 
-    // FIXED: Instead of showing the raw Google API error, we show the strict rule fallback
     if (data.error) {
-      console.error("Google Gemini API Error:", data.error);
-      return res.status(200).json({ 
-        reply: "I am specifically designed to answer health-related questions and provide information about this monitoring system. (Note: The network is currently busy, please try again in a moment)." 
-      });
+      return res.status(200).json({ reply: "I am specifically designed to answer health-related questions. (Note: The network is currently busy, please try again in a moment)." });
     }
     
-    // FIXED: If the AI returns empty because it didn't know what to do with a random word, it defaults to the strict rule
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic.";
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I cannot assist with that topic at this time.";
 
     return res.status(200).json({ reply: replyText });
   } catch (error) {
-    console.error("Server Crash Error:", error);
-    return res.status(500).json({ error: "System offline. Please check your connection." });
+    return res.status(500).json({ error: "System offline." });
   }
 }
