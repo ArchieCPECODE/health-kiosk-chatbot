@@ -238,8 +238,8 @@ How can I assist you today?`;
         {/* System Creators Panel Subfooter */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
           <p>© 2026 VitalsKiosk.AI. All rights reserved. Medical Diagnostic Kiosk Interface.</p>
-          <p className="bg-slate-800/50 border border-slate-700/50 text-slate-300 px-3 py-1.5 rounded-md">
-            System Engineers: <span className="text-blue-400 font-semibold">Archie Abona</span> & <span className="text-blue-400 font-semibold">Jarold Camino</span>
+          <p className="bg-slate-800/50 border border-slate-700/50 text-slate-300 px-3 py-1.5 rounded-md text-center sm:text-left">
+            System Engineers: <span className="text-blue-400 font-semibold">Archie Abona</span>, <span className="text-blue-400 font-semibold">Jarold Camino</span> & <span className="text-blue-400 font-semibold">Kiervy Lawas</span>
           </p>
         </div>
       </footer>

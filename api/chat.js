@@ -11,7 +11,9 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     const { message } = req.body;
 
+    // Added the system engineers to the AI's brain
     const systemInstruction = `You are HealthBot, an AI assistant for a Health Monitoring Kiosk.
+The system engineers and creators of this project are Archie Abona, Jarold Camino, and Kiervy Lawas.
 The kiosk measures: Blood Pressure (BP), Heart Rate, BMI, Height, Weight, Oxygen Level (SpO2), and Sugar Levels.
 Instructions: 
 - Use professional, medical-grade yet accessible language.
@@ -29,7 +31,6 @@ Instructions:
       ]
     };
 
-    // FIXED: Switched to gemini-2.5-flash which is natively supported on the v1 path
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
