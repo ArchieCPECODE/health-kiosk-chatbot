@@ -11,25 +11,35 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     const { message, userData } = req.body;
     
+    // Normalize the message to catch variations easily
     const lowerMsg = message.toLowerCase().trim();
 
     // ==========================================
     // 🚀 CAPSTONE PRESENTATION BYPASS (INSTANT RESPONSES)
+    // Guarantees zero latency and no traffic errors!
     // ==========================================
-    if (lowerMsg === "location" || lowerMsg.includes("where are you") || lowerMsg.includes("where is")) {
+    
+    // 1. System Info
+    if (lowerMsg.includes("location") || lowerMsg.includes("where are you") || lowerMsg.includes("where is")) {
       return res.status(200).json({ reply: "The kiosk is located at **St. John Paul II College of Davao**.\n\nAddress: Ecoland Dr, Matina, Davao City, 8000 Davao del Sur.\nPhone: (082) 297 8755." });
     }
-    if (lowerMsg.includes("engineers") || lowerMsg.includes("creator") || lowerMsg.includes("who built")) {
+    if (lowerMsg.includes("engineer") || lowerMsg.includes("creator") || lowerMsg.includes("who built") || lowerMsg.includes("created")) {
       return res.status(200).json({ reply: "The system engineers and creators of this project are **Archie Abona**, **Jarold Camino**, and **Kiervy Lawas**." });
     }
-    if (lowerMsg.includes("register") || lowerMsg === "how to register?") {
+    
+    // 2. Auth & Medical History Interceptors
+    if (lowerMsg.includes("register") || lowerMsg.includes("create account")) {
       return res.status(200).json({ reply: "You can securely create a patient account and scan your vitals by clicking here: [Register]" });
     }
-    if (lowerMsg.includes("login") || lowerMsg === "how to log in?") {
+    if (lowerMsg.includes("log in") || lowerMsg.includes("login") || lowerMsg.includes("signin")) {
       return res.status(200).json({ reply: "If you already have an account, you can access your data here: [Login]" });
     }
+    // FIXED: Intercepts the auto-message when saving medical history!
+    if (lowerMsg.includes("updated my medical history") || lowerMsg.includes("acknowledge") || lowerMsg.includes("history profile")) {
+      return res.status(200).json({ reply: "✅ **Medical History Acknowledged.**\n\nYour profile has been securely updated. I will factor these details into your future health analyses. What would you like to do next?" });
+    }
 
-    // --- Core Vitals Responses ---
+    // 3. Vitals & Health Conditions
     if (lowerMsg === "bp" || lowerMsg.includes("blood pressure")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Based on your recent scan, your **[Blood Pressure]** is ${userData.vitals.bp}. This is considered highly elevated.\n\n**[Health Alert]** Please consult a healthcare professional immediately. Avoid high-sodium foods and rest.` });
