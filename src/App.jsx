@@ -142,11 +142,8 @@ export default function HealthSystemApp() {
       <div className="space-y-1.5 leading-relaxed">
         {lines.map((line, i) => {
           if (!line.trim()) return <div key={i} className="h-1"></div>;
-          let content = isList ? line.trim().replace(/^[-*]\s/, '') : line;
           const isList = /^[-*]\s/.test(line.trim());
-          
-          // FIXED: Prevents **[Link]** formatting errors from breaking the clickable buttons
-          content = content.replace(/\*\*\[(.*?)\]\*\*/g, '[$1]');
+          let content = isList ? line.trim().replace(/^[-*]\s/, '') : line;
           
           const parts = content.split(/(\*\*.*?\*\*|\[.*?\])/g);
           const formattedParts = parts.map((part, j) => {
@@ -215,10 +212,12 @@ export default function HealthSystemApp() {
     sendMessageToBot(`Hi Eugene, I just successfully logged in as ${user.name}. Please give me a quick summary of my vitals.`);
   };
 
+  // --- UPDATED DETAILED MEDICAL HISTORY HANDLER ---
   const handleSaveMedicalHistory = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     
+    // Process the detailed list of conditions
     const conditionsList = [
       'hypertension', 'diabetes', 'heartCondition', 'asthma', 
       'seizures', 'cancer', 'arthritis', 'kidneyDisease', 
@@ -252,6 +251,7 @@ export default function HealthSystemApp() {
     sendMessageToBot("I just updated my Medical History profile. Please acknowledge.");
   };
 
+  // --- UPDATED DETAILED MEDICAL HISTORY UI ---
   const renderMedicalHistory = () => (
     <div className="pt-16 pb-20 px-4 max-w-4xl mx-auto min-h-[70vh]">
       <div className="flex items-center gap-3 mb-8">
@@ -265,6 +265,7 @@ export default function HealthSystemApp() {
 
       <form onSubmit={handleSaveMedicalHistory} className="space-y-6">
         
+        {/* Lifestyle & Demographics Card */}
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
           <h3 className="font-bold text-lg text-slate-800 mb-5 flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-blue-600" /> Lifestyle & Demographics
@@ -294,6 +295,7 @@ export default function HealthSystemApp() {
           </div>
         </div>
 
+        {/* Past Medical History Card */}
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
           <h3 className="font-bold text-lg text-slate-800 mb-5 flex items-center gap-2">
             <HeartPulse className="w-5 h-5 text-rose-500" /> Past Medical History
@@ -327,6 +329,7 @@ export default function HealthSystemApp() {
           </div>
         </div>
 
+        {/* Clinical Details Card */}
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
           <h3 className="font-bold text-lg text-slate-800 mb-5 flex items-center gap-2">
             <FileText className="w-5 h-5 text-indigo-500" /> Clinical Details
