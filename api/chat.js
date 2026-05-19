@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ reply: "✅ **Medical History Acknowledged.**\n\nYour profile has been securely updated. I will factor these details into your future health analyses. What would you like to do next?" });
     }
 
-    // 3. Vitals & Health Conditions (BROADENED TO CATCH SENTENCES)
+    // 3. Vitals & Health Conditions
     if (lowerMsg === "bp" || lowerMsg.includes(" my bp") || lowerMsg.includes("blood pressure")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Based on your recent scan, your **[Blood Pressure]** is ${userData.vitals.bp}. This is considered highly elevated.\n\n**[Health Alert]** Please consult a healthcare professional immediately. Avoid high-sodium foods and rest.` });
@@ -44,7 +44,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "Blood Pressure measures the force of blood against your artery walls. A normal reading is less than 120/80 mmHg. Please **[Register]** or **[Login]** to scan your vitals." });
       }
     }
-    
     if (lowerMsg.includes("bmi") || lowerMsg.includes("body mass index")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Your **[BMI]** is ${userData.vitals.bmi}. This falls into the overweight category.\n\n**[Health Alert]** Maintaining a healthy weight reduces cardiovascular risks. Consider a balanced diet and 30 mins of daily exercise.` });
@@ -52,8 +51,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "BMI is a measure of body fat based on height and weight. Please **[Register]** or **[Login]** to view your BMI." });
       }
     }
-    
-    // Fixed: Now catches "what is my heart rate", "resting heart rate", etc.
     if (lowerMsg.includes("heart rate") || lowerMsg === "hr" || lowerMsg.includes(" my hr") || lowerMsg.includes("pulse") || lowerMsg.includes("bpm")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Your **[Heart Rate]** is ${userData.vitals.hr} bpm. This is a normal, healthy resting heart rate.` });
@@ -61,7 +58,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "Heart Rate measures how many times your heart beats per minute. A normal resting rate is 60-100 bpm. Please **[Register]** or **[Login]** to scan your heart rate." });
       }
     }
-    
     if (lowerMsg.includes("spo2") || lowerMsg.includes("oxygen")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Your Oxygen Level (**[SpO2]**) is ${userData.vitals.spo2}%. This is a healthy, normal reading.` });
@@ -69,7 +65,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "SpO2 measures the oxygen saturation in your blood. Normal levels are 95% or higher." });
       }
     }
-    
     if (lowerMsg.includes("sugar") || lowerMsg.includes("glucose")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Your **[Blood Sugar]** is ${userData.vitals.sugar} mg/dL. This is within the normal fasting range.` });
@@ -77,7 +72,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "Blood Sugar levels indicate the amount of glucose in your blood." });
       }
     }
-    
     if (lowerMsg.includes("vitals") || lowerMsg.includes("summary") || lowerMsg.includes("evaluate") || lowerMsg.includes("health condition") || lowerMsg.includes("my health") || lowerMsg.includes("status")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Here is a quick summary of your health condition, ${userData.name}:\n* **[Blood Pressure]**: ${userData.vitals.bp}\n* **[Heart Rate]**: ${userData.vitals.hr} bpm\n* **[BMI]**: ${userData.vitals.bmi}\n\n**[Health Alert]** I detected some elevated metrics. Please click the alert to view your dashboard for full details.` });
@@ -85,13 +79,19 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "I can analyze your health condition once you have scanned your metrics. Please **[Register]** or **[Login]** to get started."});
       }
     }
-    
     if (lowerMsg.includes("tip") || lowerMsg.includes("advice") || lowerMsg.includes("recommend") || lowerMsg.includes("improve")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Based on your profile, ${userData.name}, here are some personalized tips:\n\n1. **Manage Blood Pressure:** Because your BP is elevated, try to reduce sodium intake and prioritize rest.\n2. **Active Lifestyle:** Incorporate 30 minutes of daily exercise to help manage your BMI.\n3. **Stay Hydrated:** Drink plenty of water throughout the day.\n\n*Remember, always consult with a healthcare professional for official medical advice.*` });
       } else {
         return res.status(200).json({ reply: "Here are some general daily health tips:\n\n1. Eat a balanced diet rich in fruits and vegetables.\n2. Exercise for at least 30 minutes daily.\n3. Stay hydrated and aim for 7-8 hours of sleep.\n\nPlease **[Register]** or **[Login]** for personalized advice based on your specific vitals." });
       }
+    }
+
+    // 4. NEW: PANEL TEST INTERCEPTOR (Junk Words)
+    // Instantly rejects common non-medical test words without needing the API
+    const testWords = ["paper", "test", "hello", "hi", "hey", "car", "dog", "cat", "weather", "math", "game", "movie", "food", "joke"];
+    if (testWords.includes(lowerMsg)) {
+        return res.status(200).json({ reply: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic." });
     }
 
     // ==========================================
@@ -108,10 +108,8 @@ export default async function handler(req, res) {
     const systemInstruction = `You are Chatbot Eugene, an AI assistant for a Health Monitoring Kiosk.
 ${patientChart}
 Instructions: 
-- Answer ALL general health, wellness, symptoms, diet, nutrition, fitness, and medical questions to the best of your ability using professional language.
-- If the question is even slightly related to human biology or wellness, YOU MUST ANSWER IT. Do not aggressively filter.
-- ALWAYS remind the user at the end of your response to consult a real doctor for official diagnoses.
-- STRICT RULE: ONLY if the user asks a question 100% COMPLETELY UNRELATED to health, medicine, biology, wellness, this kiosk system, or the location (e.g., asking about cars, video games, or math homework), reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."`;
+- Answer ALL general health, wellness, symptoms, diet, nutrition, fitness, and medical questions to the best of your ability.
+- STRICT RULE: ONLY if the user asks a question 100% COMPLETELY UNRELATED to health, medicine, biology, wellness, this kiosk system, or the location, reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."`;
 
     const payload = {
       contents: [{ role: "user", parts: [{ text: `${systemInstruction}\n\nUser query: ${message}` }] }]
