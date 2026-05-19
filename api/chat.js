@@ -34,7 +34,6 @@ export default async function handler(req, res) {
     if (lowerMsg.includes("log in") || lowerMsg.includes("login") || lowerMsg.includes("signin")) {
       return res.status(200).json({ reply: "If you already have an account, you can access your data here: [Login]" });
     }
-    // FIXED: Intercepts the auto-message when saving medical history!
     if (lowerMsg.includes("updated my medical history") || lowerMsg.includes("acknowledge") || lowerMsg.includes("history profile")) {
       return res.status(200).json({ reply: "✅ **Medical History Acknowledged.**\n\nYour profile has been securely updated. I will factor these details into your future health analyses. What would you like to do next?" });
     }
@@ -81,6 +80,15 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: `Here is a quick summary of your health condition, ${userData.name}:\n* **[Blood Pressure]**: ${userData.vitals.bp}\n* **[Heart Rate]**: ${userData.vitals.hr} bpm\n* **[BMI]**: ${userData.vitals.bmi}\n\n**[Health Alert]** I detected some elevated metrics. Please click the alert to view your dashboard for full details.` });
       } else {
         return res.status(200).json({ reply: "I can analyze your health condition once you have scanned your metrics. Please **[Register]** or **[Login]** to get started."});
+      }
+    }
+
+    // 4. NEW: Health Tips & Advice Interceptor
+    if (lowerMsg.includes("tip") || lowerMsg.includes("advice") || lowerMsg.includes("recommend") || lowerMsg.includes("improve")) {
+      if (userData && userData.vitals) {
+        return res.status(200).json({ reply: `Based on your profile, ${userData.name}, here are some personalized tips:\n\n1. **Manage Blood Pressure:** Because your BP is elevated, try to reduce sodium intake and prioritize rest.\n2. **Active Lifestyle:** Incorporate 30 minutes of daily exercise to help manage your BMI.\n3. **Stay Hydrated:** Drink plenty of water throughout the day.\n\n*Remember, always consult with a healthcare professional for official medical advice.*` });
+      } else {
+        return res.status(200).json({ reply: "Here are some general daily health tips:\n\n1. Eat a balanced diet rich in fruits and vegetables.\n2. Exercise for at least 30 minutes daily.\n3. Stay hydrated and aim for 7-8 hours of sleep.\n\nPlease **[Register]** or **[Login]** for personalized advice based on your specific vitals." });
       }
     }
 
