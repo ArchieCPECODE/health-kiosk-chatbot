@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Activity, Heart, Scale, Ruler, Droplet, Printer, Cpu, 
-  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock, AlertTriangle, Info, MapPin, Phone, FileText, CheckCircle2, History 
+  MessageCircle, X, Send, ShieldCheck, ChevronRight, Stethoscope, Bot, User, LayoutDashboard, LogOut, Lock, AlertTriangle, Info, MapPin, Phone, FileText, CheckCircle2, History, Briefcase, HeartPulse 
 } from 'lucide-react';
 
-// --- Auth Component (Handles both Login & Register) ---
 const AuthForm = ({ onComplete, usersDb, setUsersDb }) => {
-  const [mode, setMode] = useState('login'); // 'login' or 'register'
+  const [mode, setMode] = useState('login'); 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
@@ -20,24 +19,22 @@ const AuthForm = ({ onComplete, usersDb, setUsersDb }) => {
     if (mode === 'login') {
       const existingUser = usersDb[email];
       if (existingUser && existingUser.password === password) {
-        onComplete(existingUser); // Success Login
+        onComplete(existingUser); 
       } else {
         setError('Invalid email or password. Please try again.');
       }
     } else {
-      // Registration Step 1
       if (usersDb[email]) {
         setError('An account with this email already exists. Please log in.');
         return;
       }
       setFormData({ name: e.target.name.value, email, password });
-      setStep(2); // Go to OTP
+      setStep(2); 
     }
   };
 
   const handleOTP = (e) => {
     e.preventDefault();
-    // Simulate creating new user with mock hardware vitals
     const newUser = {
       name: formData.name,
       email: formData.email,
@@ -47,10 +44,9 @@ const AuthForm = ({ onComplete, usersDb, setUsersDb }) => {
         { title: "Stage 2 Hypertension", type: "warning", desc: "Your blood pressure is highly elevated (142/92). Please consult a healthcare professional.", advice: "Avoid high-sodium foods and rest." },
         { title: "Overweight", type: "info", desc: "Your BMI is 26.5. Maintaining a healthy weight reduces cardiovascular risks.", advice: "Consider a balanced diet." }
       ],
-      history: {} // Empty history initially
+      history: {} 
     };
     
-    // Save to simulated Database
     const updatedDb = { ...usersDb, [formData.email]: newUser };
     setUsersDb(updatedDb);
     onComplete(newUser);
@@ -120,7 +116,6 @@ export default function HealthSystemApp() {
   const [currentPage, setCurrentPage] = useState('home'); 
   const [currentUser, setCurrentUser] = useState(null);
   
-  // LocalStorage Database simulation for persistence
   const [usersDb, setUsersDb] = useState({});
   useEffect(() => {
     const savedDb = localStorage.getItem('vitalsKioskDb');
@@ -217,18 +212,35 @@ export default function HealthSystemApp() {
     sendMessageToBot(`Hi Eugene, I just successfully logged in as ${user.name}. Please give me a quick summary of my vitals.`);
   };
 
-  // Update Medical History Handler
+  // --- UPDATED DETAILED MEDICAL HISTORY HANDLER ---
   const handleSaveMedicalHistory = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
+    
+    // Process the detailed list of conditions
+    const conditionsList = [
+      'hypertension', 'diabetes', 'heartCondition', 'asthma', 
+      'seizures', 'cancer', 'arthritis', 'kidneyDisease', 
+      'thyroid', 'mentalHealth', 'liverDisease', 'stroke'
+    ];
+    
+    const conditionsObj = {};
+    conditionsList.forEach(c => {
+      conditionsObj[c] = formData.get(c) === 'on';
+    });
+
     const historyData = {
-      hypertension: formData.get('hypertension') === 'on',
-      diabetes: formData.get('diabetes') === 'on',
-      heartCondition: formData.get('heartCondition') === 'on',
-      asthma: formData.get('asthma') === 'on',
-      allergies: formData.get('allergies'),
-      surgeries: formData.get('surgeries'),
-      medications: formData.get('medications')
+      lifestyle: {
+        occupation: formData.get('occupation'),
+        smoker: formData.get('smoker'),
+        exercise: formData.get('exercise')
+      },
+      conditions: conditionsObj,
+      details: {
+        allergies: formData.get('allergies'),
+        medications: formData.get('medications'),
+        surgeries: formData.get('surgeries')
+      }
     };
 
     const updatedUser = { ...currentUser, history: historyData };
@@ -239,55 +251,111 @@ export default function HealthSystemApp() {
     sendMessageToBot("I just updated my Medical History profile. Please acknowledge.");
   };
 
+  // --- UPDATED DETAILED MEDICAL HISTORY UI ---
   const renderMedicalHistory = () => (
-    <div className="pt-16 pb-20 px-4 max-w-3xl mx-auto min-h-[70vh]">
+    <div className="pt-16 pb-20 px-4 max-w-4xl mx-auto min-h-[70vh]">
       <div className="flex items-center gap-3 mb-8">
-        <button onClick={() => setCurrentPage('dashboard')} className="text-slate-500 hover:text-blue-600 transition-colors">&larr; Back to Dashboard</button>
+        <button onClick={() => setCurrentPage('dashboard')} className="text-slate-500 hover:text-blue-600 transition-colors">← Back to Dashboard</button>
       </div>
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-6 border-b pb-4">
-          <FileText className="w-8 h-8 text-blue-600" />
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Patient Medical History</h2>
-            <p className="text-slate-500 text-sm">Please update your records to help our AI provide better analysis.</p>
+      
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-slate-900">Clinical Intake Form</h2>
+        <p className="text-slate-500">Please update your comprehensive medical background to assist our AI analysis.</p>
+      </div>
+
+      <form onSubmit={handleSaveMedicalHistory} className="space-y-6">
+        
+        {/* Lifestyle & Demographics Card */}
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="font-bold text-lg text-slate-800 mb-5 flex items-center gap-2">
+            <Briefcase className="w-5 h-5 text-blue-600" /> Lifestyle & Demographics
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Occupation / Type of Work</label>
+              <input name="occupation" defaultValue={currentUser?.history?.lifestyle?.occupation || ''} type="text" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="e.g. Student, Sitting, Lifting..." />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Do you currently smoke?</label>
+              <select name="smoker" defaultValue={currentUser?.history?.lifestyle?.smoker || 'No'} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+                <option value="Former">Former Smoker</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Regular Exercise Level</label>
+              <select name="exercise" defaultValue={currentUser?.history?.lifestyle?.exercise || '0 days'} className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                <option value="0 days">0 days/week</option>
+                <option value="1-2 days">1-2 days/week</option>
+                <option value="3-5 days">3-5 days/week</option>
+                <option value="6-7 days">6-7 days/week</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <form onSubmit={handleSaveMedicalHistory} className="space-y-6">
-          <div>
-            <h3 className="font-bold text-slate-800 mb-3">Past Medical History (Check all that apply)</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {['Hypertension', 'Diabetes', 'Heart Condition', 'Asthma'].map((condition) => (
-                <label key={condition} className="flex items-center gap-2 cursor-pointer p-3 border rounded-xl hover:bg-slate-50 transition-colors">
-                  <input type="checkbox" name={condition.toLowerCase().replace(' ', '')} defaultChecked={currentUser?.history?.[condition.toLowerCase().replace(' ', '')]} className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
-                  <span className="text-sm font-medium text-slate-700">{condition}</span>
-                </label>
-              ))}
-            </div>
+        {/* Past Medical History Card */}
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="font-bold text-lg text-slate-800 mb-5 flex items-center gap-2">
+            <HeartPulse className="w-5 h-5 text-rose-500" /> Past Medical History
+          </h3>
+          <p className="text-sm text-slate-500 mb-4">Do you currently have or have you ever had a history of:</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              { id: 'hypertension', label: 'High Blood Pressure' },
+              { id: 'diabetes', label: 'Diabetes' },
+              { id: 'heartCondition', label: 'Heart Condition / Disease' },
+              { id: 'asthma', label: 'Asthma / Respiratory' },
+              { id: 'seizures', label: 'Seizures / Epilepsy' },
+              { id: 'cancer', label: 'Cancer / Chemotherapy' },
+              { id: 'arthritis', label: 'Osteoarthritis' },
+              { id: 'kidneyDisease', label: 'Kidney Disease' },
+              { id: 'thyroid', label: 'Thyroid Disorder' },
+              { id: 'mentalHealth', label: 'Depression / Anxiety' },
+              { id: 'liverDisease', label: 'Liver Disease / Hepatitis' },
+              { id: 'stroke', label: 'Stroke' }
+            ].map((condition) => (
+              <label key={condition.id} className="flex items-center gap-3 cursor-pointer p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+                <input 
+                  type="checkbox" 
+                  name={condition.id} 
+                  defaultChecked={currentUser?.history?.conditions?.[condition.id]} 
+                  className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500" 
+                />
+                <span className="text-sm font-medium text-slate-700">{condition.label}</span>
+              </label>
+            ))}
           </div>
+        </div>
 
+        {/* Clinical Details Card */}
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="font-bold text-lg text-slate-800 mb-5 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-indigo-500" /> Clinical Details
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block font-bold text-slate-800 mb-2">Known Allergies</label>
-              <textarea name="allergies" defaultValue={currentUser?.history?.allergies || ''} className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24" placeholder="List any food or drug allergies..."></textarea>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Known Allergies</label>
+              <textarea name="allergies" defaultValue={currentUser?.history?.details?.allergies || ''} className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm h-28 resize-none" placeholder="List any food, drug, or environmental allergies..."></textarea>
             </div>
             <div>
-              <label className="block font-bold text-slate-800 mb-2">Current Medications</label>
-              <textarea name="medications" defaultValue={currentUser?.history?.medications || ''} className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24" placeholder="List current medications and dosages..."></textarea>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Current Medications</label>
+              <textarea name="medications" defaultValue={currentUser?.history?.details?.medications || ''} className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm h-28 resize-none" placeholder="List current medications and dosages..."></textarea>
             </div>
             <div className="md:col-span-2">
-              <label className="block font-bold text-slate-800 mb-2">Previous Surgeries or Major Illnesses</label>
-              <textarea name="surgeries" defaultValue={currentUser?.history?.surgeries || ''} className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24" placeholder="Please specify year and type..."></textarea>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Previous Surgeries or Major Hospitalizations</label>
+              <textarea name="surgeries" defaultValue={currentUser?.history?.details?.surgeries || ''} className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm h-24 resize-none" placeholder="Please specify year, location, and type of procedure..."></textarea>
             </div>
           </div>
+        </div>
 
-          <div className="pt-4 border-t flex justify-end">
-            <button type="submit" className="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-700 transition-colors shadow-md flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" /> Save Medical History
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="flex justify-end pt-4">
+          <button type="submit" className="bg-blue-600 text-white font-bold py-4 px-10 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 flex items-center gap-2 text-lg">
+            <CheckCircle2 className="w-6 h-6" /> Secure & Save Profile
+          </button>
+        </div>
+      </form>
     </div>
   );
 
