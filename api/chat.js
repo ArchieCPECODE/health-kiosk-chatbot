@@ -11,23 +11,18 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     const { message, userData } = req.body;
     
-    // Normalize the message to catch variations easily
     const lowerMsg = message.toLowerCase().trim();
 
     // ==========================================
     // 🚀 CAPSTONE PRESENTATION BYPASS (INSTANT RESPONSES)
-    // Guarantees zero latency and no traffic errors!
     // ==========================================
     
-    // 1. System Info
     if (lowerMsg.includes("location") || lowerMsg.includes("where are you") || lowerMsg.includes("where is")) {
       return res.status(200).json({ reply: "The kiosk is located at **St. John Paul II College of Davao**.\n\nAddress: Ecoland Dr, Matina, Davao City, 8000 Davao del Sur.\nPhone: (082) 297 8755." });
     }
     if (lowerMsg.includes("engineer") || lowerMsg.includes("creator") || lowerMsg.includes("who built") || lowerMsg.includes("created")) {
       return res.status(200).json({ reply: "The system engineers and creators of this project are **Archie Abona**, **Jarold Camino**, and **Kiervy Lawas**." });
     }
-    
-    // 2. Auth & Medical History Interceptors
     if (lowerMsg.includes("register") || lowerMsg.includes("create account")) {
       return res.status(200).json({ reply: "You can securely create a patient account and scan your vitals by clicking here: [Register]" });
     }
@@ -38,7 +33,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ reply: "✅ **Medical History Acknowledged.**\n\nYour profile has been securely updated. I will factor these details into your future health analyses. What would you like to do next?" });
     }
 
-    // 3. Vitals & Health Conditions
+    // --- Core Vitals Responses ---
     if (lowerMsg === "bp" || lowerMsg.includes("blood pressure")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Based on your recent scan, your **[Blood Pressure]** is ${userData.vitals.bp}. This is considered highly elevated.\n\n**[Health Alert]** Please consult a healthcare professional immediately. Avoid high-sodium foods and rest.` });
@@ -74,7 +69,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "Blood Sugar levels indicate the amount of glucose in your blood." });
       }
     }
-    
     if (lowerMsg.includes("vitals") || lowerMsg.includes("summary") || lowerMsg.includes("evaluate") || lowerMsg.includes("health condition") || lowerMsg.includes("my health") || lowerMsg.includes("status")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Here is a quick summary of your health condition, ${userData.name}:\n* **[Blood Pressure]**: ${userData.vitals.bp}\n* **[Heart Rate]**: ${userData.vitals.hr} bpm\n* **[BMI]**: ${userData.vitals.bmi}\n\n**[Health Alert]** I detected some elevated metrics. Please click the alert to view your dashboard for full details.` });
@@ -82,8 +76,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ reply: "I can analyze your health condition once you have scanned your metrics. Please **[Register]** or **[Login]** to get started."});
       }
     }
-
-    // 4. NEW: Health Tips & Advice Interceptor
     if (lowerMsg.includes("tip") || lowerMsg.includes("advice") || lowerMsg.includes("recommend") || lowerMsg.includes("improve")) {
       if (userData && userData.vitals) {
         return res.status(200).json({ reply: `Based on your profile, ${userData.name}, here are some personalized tips:\n\n1. **Manage Blood Pressure:** Because your BP is elevated, try to reduce sodium intake and prioritize rest.\n2. **Active Lifestyle:** Incorporate 30 minutes of daily exercise to help manage your BMI.\n3. **Stay Hydrated:** Drink plenty of water throughout the day.\n\n*Remember, always consult with a healthcare professional for official medical advice.*` });
@@ -103,12 +95,14 @@ export default async function handler(req, res) {
       }
     }
 
+    // UPDATED PROMPT: Much more lenient towards health topics!
     const systemInstruction = `You are Chatbot Eugene, an AI assistant for a Health Monitoring Kiosk.
 ${patientChart}
 Instructions: 
-- Answer ALL general health, wellness, symptoms, diet, and medical questions to the best of your ability using professional language.
+- Answer ALL general health, wellness, symptoms, diet, nutrition, fitness, and medical questions to the best of your ability using professional language.
+- If the question is even slightly related to human biology or wellness, YOU MUST ANSWER IT. Do not aggressively filter.
 - ALWAYS remind the user at the end of your response to consult a real doctor for official diagnoses.
-- STRICT RULE: If the user asks a question COMPLETELY UNRELATED to health, medicine, biology, wellness, this kiosk system, or the location (e.g., asking about cars, video games, math homework), reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."`;
+- STRICT RULE: ONLY if the user asks a question 100% COMPLETELY UNRELATED to health, medicine, biology, wellness, this kiosk system, or the location (e.g., asking about cars, video games, or math homework), reply EXACTLY with: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic."`;
 
     const payload = {
       contents: [{ role: "user", parts: [{ text: `${systemInstruction}\n\nUser query: ${message}` }] }]
@@ -121,9 +115,10 @@ Instructions:
 
     const data = await response.json();
 
+    // FIXED: Correctly identifies network traffic errors vs topic refusals!
     if (data.error) {
       console.error("Google API Error:", data.error);
-      return res.status(200).json({ reply: "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic.\n\n*(Note: If you asked a valid medical question, the AI network is currently experiencing high traffic. Please try again).* " });
+      return res.status(200).json({ reply: "⚠️ **Network Busy:** The AI connection is currently experiencing high traffic. Please wait a few seconds and try asking your health question again." });
     }
     
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I am specifically designed to answer health-related questions and provide information about this monitoring system. I cannot assist with that topic.";
